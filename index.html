@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ENPLC Exam Trainer Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#f4f7f9; transition: filter 0.3s ease; }
+    .sidebar { width:230px; background:#006d63; color:white; position:fixed; top:0; bottom:0; padding:10px; overflow-y:auto; }
+    .sidebar h2 { text-align:center; font-size:18px; margin-bottom:10px; }
+    .sidebar a { display:block; color:white; text-decoration:none; padding:8px 10px; border-radius:5px; }
+    .sidebar a:hover { background:#009688; }
+    .main { margin-left:250px; padding:15px; }
+    .notice-bar { background:#fff3cd; padding:5px 10px; border-radius:5px; margin-bottom:10px; border:1px solid #ffeeba; font-size:14px; }
+    .top-bar { background:#fff; padding:10px 15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:15px; margin-top:10px; }
+    .card { background:#fff; padding:15px; border-radius:12px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); cursor:pointer; transition:transform 0.2s; }
+    .card:hover { transform:scale(1.03); }
+    .card i { font-size:28px; color:#009688; margin-bottom:10px; }
+
+    /* Loader */
+    #loadingSpinner {
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      width:70px;
+      height:70px;
+      border:8px solid #ddd;
+      border-top:8px solid #009688;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+      z-index:9999;
+    }
+    @keyframes spin {
+      0% { transform:translate(-50%,-50%) rotate(0deg); }
+      100% { transform:translate(-50%,-50%) rotate(360deg); }
+    }
+
+    /* Modal */
+    #dataModal {
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%) scale(0.7) rotateX(-10deg);
+      background:white;
+      padding:20px;
+      border-radius:20px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.4);
+      width:70%;
+      max-height:70%;
+      overflow:auto;
+      transition:all 0.4s ease;
+      z-index:10000;
+    }
+    #dataModal.show {
+      display:block;
+      transform:translate(-50%, -50%) scale(1) rotateX(0deg);
+    }
+    #closeBtn {
+      float:right;
+      cursor:pointer;
+      background:#ff4444;
+      color:white;
+      border:none;
+      padding:4px 8px;
+      border-radius:5px;
+      font-size:14px;
+    }
+    body.blur {
+      filter:blur(4px);
+      pointer-events:none;
+      user-select:none;
+    }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th, td { border:1px solid #ccc; padding:8px; text-align:left; font-size:14px; }
+    th { background:#009688; color:white; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Exam Trainer Workbench</h2>
+    <a href="#">Dashboard</a>
+    <a href="#">Inbox</a>
+    <a href="#">Notice</a>
+    <a href="#">Fees</a>
+    <a href="#">Attendance</a>
+    <a href="#">Accounts</a>
+  </div>
+
+  <div class="main">
+    <div class="notice-bar" id="noticeBar">📢 Loading Notice...</div>
+    <div class="top-bar">
+      <div>Session: <select><option>2025-26</option></select></div>
+      <div>Welcome: Mrs. Mousumi Kalita (1032226)</div>
+    </div>
+
+    <div class="cards">
+      <!-- All Cards -->
+      <div class="card" onclick="loadSheet('Download App')"><i class="fa-solid fa-download"></i><p>Download App</p></div>
+      <div class="card" onclick="loadSheet('SMS Balance')"><i class="fa-solid fa-comment-sms"></i><p>SMS Balance</p></div>
+      <div class="card" onclick="loadSheet('Students')"><i class="fa-solid fa-users"></i><p>Students</p></div>
+      <div class="card" onclick="loadSheet('Active Staff')"><i class="fa-solid fa-user-tie"></i><p>Active Staff</p></div>
+      <div class="card" onclick="loadSheet('Active User')"><i class="fa-solid fa-user"></i><p>Active User</p></div>
+      <div class="card" onclick="loadSheet('Fee Today')"><i class="fa-solid fa-sack-dollar"></i><p>Fee Today</p></div>
+      <div class="card" onclick="loadSheet('Help Videos')"><i class="fa-solid fa-circle-question"></i><p>Help Videos</p></div>
+      <div class="card" onclick="loadSheet('Enquiry')"><i class="fa-solid fa-envelope"></i><p>Inbox</p></div>
+      <div class="card" onclick="loadSheet('ID Cards')"><i class="fa-solid fa-id-card"></i><p>ID Cards</p></div>
+      <div class="card" onclick="loadSheet('Admit Cards')"><i class="fa-solid fa-certificate"></i><p>Admit Cards</p></div>
+      <div class="card" onclick="loadSheet('TC Cards')"><i class="fa-solid fa-id-card"></i><p>TC Cards</p></div>
+      <div class="card" onclick="loadSheet('QR Attendance')"><i class="fa-solid fa-user"></i><p>QR Attendance</p></div>
+      <div class="card" onclick="loadSheet('Student Attendance')"><i class="fa-solid fa-check-double"></i><p>Student Attendance</p></div>
+      <div class="card" onclick="loadSheet('Notice')"><i class="fa-solid fa-bullhorn"></i><p>Notice</p></div>
+      <div class="card" onclick="loadSheet('Time Table')"><i class="fa-solid fa-calendar-days"></i><p>Time Table</p></div>
+      <div class="card" onclick="loadSheet('Home Work')"><i class="fa-solid fa-book"></i><p>Home Work</p></div>
+      <div class="card" onclick="loadSheet('Staff')"><i class="fa-solid fa-users-gear"></i><p>Staff</p></div>
+      <div class="card" onclick="loadSheet('Staff Attendance')"><i class="fa-solid fa-user-check"></i><p>Staff Attendance</p></div>
+      <div class="card" onclick="loadSheet('Fee Deposit')"><i class="fa-solid fa-sack-dollar"></i><p>Fee Deposit</p></div>
+      <div class="card" onclick="loadSheet('Fee Report')"><i class="fa-solid fa-file-invoice-dollar"></i><p>Fee Report</p></div>
+      <div class="card" onclick="loadSheet('Payroll Management')"><i class="fa-solid fa-money-check-dollar"></i><p>Payroll Management</p></div>
+      <div class="card" onclick="loadSheet('Accounts')"><i class="fa-solid fa-file-invoice"></i><p>Accounts</p></div>
+      <div class="card" onclick="loadSheet('Send SMS')"><i class="fa-solid fa-paper-plane"></i><p>Send SMS</p></div>
+    </div>
+  </div>
+
+  <!-- Loader & Modal -->
+  <div id="loadingSpinner"></div>
+  <div id="dataModal"></div>
+
+  <script>
+  // Load Notice on Start
+  google.script.run.withSuccessHandler(showNotice).getNotice();
+  function showNotice(msg) { document.getElementById("noticeBar").innerText = "📢 " + msg; }
+
+  function loadSheet(sheetName) {
+    document.getElementById("loadingSpinner").style.display = "block";
+    document.body.classList.add("blur");
+    google.script.run.withSuccessHandler(displayTable).getSheetData(sheetName);
+  }
+
+  function displayTable(data) {
+    document.getElementById("loadingSpinner").style.display = "none";
+    document.body.classList.remove("blur");
+
+    let modal = document.getElementById("dataModal");
+    modal.style.display = "block";
+    modal.classList.add("show");
+
+    // Error / Blank Sheet Handling
+    if (data.length === 1 && (data[0][0] === "No Sheet Found" || data[0][0] === "Error loading sheet" || data[0][0] === "No Data Found")) {
+      modal.innerHTML = "<button id='closeBtn' onclick='closeModal()'>Close</button><p>" + data[0][0] + "</p>";
+      return;
+    }
+
+    let html = "<button id='closeBtn' onclick='closeModal()'>Close</button><table><tr>";
+    data[0].forEach(h => html += "<th>"+h+"</th>");
+    html += "</tr>";
+    for (let i=1;i<data.length;i++) {
+      html += "<tr>";
+      data[i].forEach(cell => html += "<td>"+cell+"</td>");
+      html += "</tr>";
+    }
+    html += "</table>";
+    modal.innerHTML = html;
+  }
+
+  function closeModal() {
+    let modal = document.getElementById("dataModal");
+    modal.classList.remove("show");
+    setTimeout(() => {
+      modal.style.display = "none";
+      modal.innerHTML = "";
+    }, 300);
+  }
+  </script>
+</body>
+</html>
